@@ -6,7 +6,7 @@ import java.util.Set;
 
 public class MainFrameForm
 {
-    private Set ManufacturerS;//24-04-2019
+    private Set ManufacturerS;
     private Set DbPoleCountEnumS;
     private Set AutomatCharReleaseTypeS;
     private Set MaxCommutationS;

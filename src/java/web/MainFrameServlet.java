@@ -51,9 +51,6 @@ public class MainFrameServlet extends HttpServlet
         } catch (SQLException sql_e) {
             throw new IOException(sql_e.getMessage());
         }
-        
-/* [ ] поля по умолчанию должны быть обозначены так, чтобы при формировании эскюэль запроса выпадало любое значение
-вероятно это символ "*" звездочка 17-04-2019 */
     
         String selManufacturer = "";
         int selDbPoleCountEnum = -1;

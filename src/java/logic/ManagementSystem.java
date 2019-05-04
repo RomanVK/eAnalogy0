@@ -1,6 +1,7 @@
 package logic;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +20,7 @@ public class ManagementSystem
     private static Connection con;
     private static ManagementSystem instance;
     private static DataSource dataSource;
+    private static ArrayList Catalogs;
 
     private ManagementSystem() {
     }
@@ -28,8 +30,9 @@ public class ManagementSystem
             try {
                 instance = new ManagementSystem();
                 Context ctx = new InitialContext();
-                instance.dataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/StudentsDS");//поменять на мою ДБ
+                instance.dataSource = (DataSource) ctx.lookup("java:comp/env/jdbc/DS");
                 con = dataSource.getConnection();
+                Catalogs = getCatalogs();
             } catch (NamingException e) {
                 e.printStackTrace();
             } catch (SQLException e) {
@@ -38,7 +41,32 @@ public class ManagementSystem
         }
         return instance;
     }
+    
+    public static ArrayList getCatalogs() throws SQLException{
+        ArrayList Catalogs = new ArrayList();
+        DatabaseMetaData dbmd = con.getMetaData();
+        ResultSet rs = dbmd.getCatalogs();
+        System.out.println("getCatalogs");
         
+        while (rs.next()) {
+            Catalogs.add(rs.getString(1));
+            System.out.println(rs.getString(1));
+        }
+        System.out.println("Catalogs.size");//
+        System.out.println(Catalogs.size());//
+        System.out.println("Catalogs remove");//
+        for(int i=0; i<=3; i++){
+            System.out.println("remove ->"+Catalogs.get(0).toString());
+            Catalogs.remove(0);
+        }//
+        System.out.println("Catalogs after remove");//
+
+        for(Object o:Catalogs){
+          System.out.println(o.toString());
+        }//
+        return Catalogs;
+    }
+    
     // ! все геттеры передают набор стрингов. может где то понадобиться перевести в примитивы 17-04-2019
     
     public Set getManufacturerS() throws SQLException{
@@ -47,13 +75,17 @@ public class ManagementSystem
         ManufacturerS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT Manufacturer "
+
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT Manufacturer "
                 +"FROM dbo.ElAutomat ");
-        while (rs.next()) {
-            String st = rs.getString(1);
-            ManufacturerS.add(st);
-        }
-        rs.close();
+            while (rs.next()) {
+                String st = rs.getString(1);
+                ManufacturerS.add(st);
+            }
+            rs.close();            
+        }        
         stmt.close();
 
         return ManufacturerS;
@@ -65,13 +97,16 @@ public class ManagementSystem
         DbPoleCountEnumS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT DbPoleCountEnum "
-                +"FROM dbo.ElAutomat "); 
-        while (rs.next()) {
-            String st = rs.getString(1);
-            DbPoleCountEnumS.add(st);
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT DbPoleCountEnum "
+                +"FROM dbo.ElAutomat ");
+            while (rs.next()) {
+                String st = rs.getString(1);
+                DbPoleCountEnumS.add(st);
+            }
+            rs.close();            
         }
-        rs.close();
         stmt.close();
         
         return DbPoleCountEnumS;
@@ -83,13 +118,16 @@ public class ManagementSystem
         AutomatCharReleaseTypeS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT AutomatCharReleaseType "
-                +"FROM dbo.ElAutomat "); 
-        while (rs.next()) {
-            String st = rs.getString(1);
-            AutomatCharReleaseTypeS.add(st);
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT AutomatCharReleaseType "
+                +"FROM dbo.ElAutomat ");
+            while (rs.next()) {
+                String st = rs.getString(1);
+                AutomatCharReleaseTypeS.add(st);
+            }
+            rs.close();            
         }
-        rs.close();
         stmt.close();
         
         return AutomatCharReleaseTypeS;
@@ -101,13 +139,16 @@ public class ManagementSystem
         MaxCommutationS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT MaxCommutation "
-                +"FROM dbo.ElAutomat "); 
-        while (rs.next()) {
-            String st = rs.getString(1);
-            MaxCommutationS.add(st);
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT MaxCommutation "
+                +"FROM dbo.ElAutomat ");
+            while (rs.next()) {
+                String st = rs.getString(1);
+                MaxCommutationS.add(st);
+            }
+            rs.close();            
         }
-        rs.close();
         stmt.close();
         
         return MaxCommutationS;
@@ -119,13 +160,16 @@ public class ManagementSystem
         NominalCurrentS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT NominalCurrent "
-                +"FROM dbo.ElAutomat "); 
-        while (rs.next()) {
-            String st = rs.getString(1);
-            NominalCurrentS.add(st);
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT NominalCurrent "
+                +"FROM dbo.ElAutomat ");
+            while (rs.next()) {
+                String st = rs.getString(1);
+                NominalCurrentS.add(st);
+            }
+            rs.close();            
         }
-        rs.close();
         stmt.close();
         
         return NominalCurrentS;
@@ -137,13 +181,16 @@ public class ManagementSystem
         CurrentScaleUzoS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT CurrentScaleUzo "
-                +"FROM dbo.ElAutomat "); 
-        while (rs.next()) {
-            String st = rs.getString(1);
-            CurrentScaleUzoS.add(st);
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT CurrentScaleUzo "
+                +"FROM dbo.ElAutomat ");
+            while (rs.next()) {
+                String st = rs.getString(1);
+                CurrentScaleUzoS.add(st);
+            }
+            rs.close();            
         }
-        rs.close();
         stmt.close();
         return CurrentScaleUzoS;
     } 
@@ -154,13 +201,16 @@ public class ManagementSystem
         NameS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT Name "
-                +"FROM dbo.ElAutomat "); 
-        while (rs.next()) {
-            String st = rs.getString(1);
-            NameS.add(st);
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT Name "
+                +"FROM dbo.ElAutomat ");
+            while (rs.next()) {
+                String st = rs.getString(1);
+                NameS.add(st);
+            }
+            rs.close();            
         }
-        rs.close();
         stmt.close();
         return NameS;
     }
@@ -171,13 +221,16 @@ public class ManagementSystem
         CodeS.add("");
         
         Statement stmt = con.createStatement();
-        ResultSet rs = stmt.executeQuery("USE test SELECT Code "
-                +"FROM dbo.ElAutomat "); 
-        while (rs.next()) {
-            String st = rs.getString(1);
-            CodeS.add(st);
+        for(Object o:this.Catalogs){
+            String sql = "USE " + o.toString();
+            ResultSet rs = stmt.executeQuery(sql + " SELECT Code "
+                +"FROM dbo.ElAutomat ");
+            while (rs.next()) {
+                String st = rs.getString(1);
+                CodeS.add(st);
+            }
+            rs.close();            
         }
-        rs.close();
         stmt.close();
         return CodeS;
     }        
@@ -224,7 +277,7 @@ public class ManagementSystem
             Parameters.add("Code");           
         }
         
-        String sql = "USE test SELECT Manufacturer, "
+        String sql = " SELECT Manufacturer, "
                 +"DbPoleCountEnum, AutomatCharReleaseType, MaxCommutation, NominalCurrent, CurrentScaleUzo, Name, Code "
                 +"FROM dbo.ElAutomat ";
         
@@ -234,73 +287,81 @@ public class ManagementSystem
             if(i>=1)sql+=" AND ";
             sql+=Concat.get(i);
         }
-                           
-        PreparedStatement stmt = con.prepareStatement(sql);
+        
+        for(Object o:this.Catalogs){
+            String s = "USE " + o.toString() + sql;
+            System.out.println(s);
+    
+            PreparedStatement stmt = con.prepareStatement(s);
 
-        for(int i=0;i<Concat.size();i++){
-            if(Parameters.get(i).toString()=="Manufacturer") stmt.setNString(i+1, selManufacturer);
-            if(Parameters.get(i).toString()=="DbPoleCountEnum") stmt.setInt(i+1, selDbPoleCountEnum);
-            if(Parameters.get(i).toString()=="AutomatCharReleaseType") stmt.setNString(i+1, selAutomatCharReleaseType);
-            if(Parameters.get(i).toString()=="MaxCommutation") stmt.setFloat(i+1, selMaxCommutation);
-            if(Parameters.get(i).toString()=="NominalCurrent") stmt.setFloat(i+1, selNominalCurrent);
-            if(Parameters.get(i).toString()=="CurrentScaleUzo") stmt.setNString(i+1, selCurrentScaleUzo);
-            if(Parameters.get(i).toString()=="Name") stmt.setNString(i+1, selName);
-            if(Parameters.get(i).toString()=="Code") stmt.setNString(i+1, selCode);
-        }
+            for(int i=0;i<Concat.size();i++){
+                if(Parameters.get(i).toString()=="Manufacturer") stmt.setNString(i+1, selManufacturer);
+                if(Parameters.get(i).toString()=="DbPoleCountEnum") stmt.setInt(i+1, selDbPoleCountEnum);
+                if(Parameters.get(i).toString()=="AutomatCharReleaseType") stmt.setNString(i+1, selAutomatCharReleaseType);
+                if(Parameters.get(i).toString()=="MaxCommutation") stmt.setFloat(i+1, selMaxCommutation);
+                if(Parameters.get(i).toString()=="NominalCurrent") stmt.setFloat(i+1, selNominalCurrent);
+                if(Parameters.get(i).toString()=="CurrentScaleUzo") stmt.setNString(i+1, selCurrentScaleUzo);
+                if(Parameters.get(i).toString()=="Name") stmt.setNString(i+1, selName);
+                if(Parameters.get(i).toString()=="Code") stmt.setNString(i+1, selCode);
+            }
 
-        ResultSet rs = stmt.executeQuery();
-        while (rs.next()) {
-            Item it = new Item(rs);
-            Items.add(it);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Item it = new Item(rs);
+                Items.add(it);
+            }
+            rs.close();
+            stmt.close();
         }
-        rs.close();
-        stmt.close();
+        
         return Items;       
     }
     
     public Collection getAnalogs(String Name)throws SQLException{
         
-        PreparedStatement stmt = con.prepareStatement("USE test SELECT Manufacturer, "
-                +"DbPoleCountEnum, AutomatCharReleaseType, MaxCommutation, NominalCurrent, CurrentScaleUzo, Name, Code "
-                +"FROM dbo.ElAutomat "
-                +"WHERE Name LIKE ?");
-        
-        stmt.setNString(1, Name);
-        
-
-        ResultSet rs = stmt.executeQuery();
-
         Item it = null;
-            
-        while (rs.next()) {
-        it  = new Item(rs);
-        }
-
+        
+        for(Object o:this.Catalogs){
+            String s = "USE " + o.toString() + " SELECT Manufacturer, "
+                    +"DbPoleCountEnum, AutomatCharReleaseType, MaxCommutation, NominalCurrent, CurrentScaleUzo, Name, Code "
+                    +"FROM dbo.ElAutomat "
+                    +"WHERE Name LIKE ?";
+            PreparedStatement stmt = con.prepareStatement(s);
+            stmt.setNString(1, Name);
+            ResultSet rs = stmt.executeQuery();    
+            while (rs.next()) {
+            it  = new Item(rs);
+            }
         rs.close();
         stmt.close();
-
+        }
         
-        PreparedStatement stmt2 = con.prepareStatement("USE test SELECT Manufacturer, "
+        Collection Analogs = new ArrayList();
+        for(Object o:this.Catalogs){
+            String s = "USE " + o.toString() + " SELECT Manufacturer, "
                 +"DbPoleCountEnum, AutomatCharReleaseType, MaxCommutation, NominalCurrent, CurrentScaleUzo, Name, Code "
                 +"FROM dbo.ElAutomat "
                 +"WHERE DbPoleCountEnum LIKE ? AND AutomatCharReleaseType LIKE ? AND MaxCommutation LIKE ? AND "
                 +"NominalCurrent LIKE ? AND "
-                +"CurrentScaleUzo LIKE ?");        
-                System.out.println(Name);
+                +"CurrentScaleUzo LIKE ?";
+            
+            PreparedStatement stmt = con.prepareStatement(s);        
+            System.out.println("Analogs SQL Query");//
+            System.out.println(s);//
 
-        stmt2.setInt(1, it.getDbPoleCountEnum());
-        stmt2.setNString(2, it.getAutomatCharReleaseType());
-        stmt2.setFloat(3, it.getMaxCommutation());
-        stmt2.setFloat(4, it.getNominalCurrent());
-        stmt2.setNString(5, it.getCurrentScaleUzo());
-        ResultSet rs2 = stmt2.executeQuery();
-        Collection Analogs = new ArrayList();
-        while (rs2.next()) {
-            Item it2 = new Item(rs2);
-            Analogs.add(it2);
+            stmt.setInt(1, it.getDbPoleCountEnum());
+            stmt.setNString(2, it.getAutomatCharReleaseType());
+            stmt.setFloat(3, it.getMaxCommutation());
+            stmt.setFloat(4, it.getNominalCurrent());
+            stmt.setNString(5, it.getCurrentScaleUzo());
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Item an = new Item(rs);
+                Analogs.add(an);
+            }
+            rs.close();
+            stmt.close();
         }
-        rs2.close();
-        stmt2.close();
         return Analogs;       
     }  
  }

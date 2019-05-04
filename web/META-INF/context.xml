@@ -5,19 +5,13 @@
       maxActive="4"
       maxIdle="2"
       maxWait="5000"
-      name="jdbc/StudentsDS"
+      name="jdbc/DS"
       username=""
       password=""
       type="javax.sql.DataSource"
-      url=
-"jdbc:sqlserver://localhost:1433;
-DataSource=DESKTOP-U35E5AA\\SQLEXPRESS;
-InitialCatalog=test;
-IntegratedSecurity=True;
-ConnectTimeout=30;Encrypt=False;
-TrustServerCertificate=False;
-ApplicationIntent=ReadWrite;
-MultiSubnetFailover=False"
-      validationQuery="SELECT 1"><!--?КАК ИЗМЕНИТЬ для Экспреса и потом для постгри? -->
+      url= "jdbc:sqlserver://localhost:1433;
+            DataSource=DESKTOP-U35E5AA\\SQLEXPRESS;
+            IntegratedSecurity=True"
+      validationQuery="SELECT 1">
     </Resource>
 </Context>
