@@ -1,20 +1,28 @@
 package web;
 
 import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Set;
-
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
+import javax.servlet.ServletContext;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
 import logic.ManagementSystem;
 import web.forms.MainFrameForm;
 
 public class MainFrameServlet extends HttpServlet
-{
+{   
     protected void processRequest(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
         // Установка кодировки для принятия параметров
@@ -22,10 +30,11 @@ public class MainFrameServlet extends HttpServlet
         int answer = 0;
         try {
             answer = checkAction(req);
+            System.out.println("answer = " + answer);
         } catch (SQLException sql_e) {
             throw new IOException(sql_e.getMessage());
         }
-        
+              
         MainFrameForm form = new MainFrameForm();
         
         try {
@@ -129,17 +138,77 @@ public class MainFrameServlet extends HttpServlet
         
         if (answer == 3) {
             try {
-            Name = req.getParameter("name");
-            Collection Analogs = ManagementSystem.getInstance().getAnalogs(Name);
-            form.setAnalogs(Analogs);
-                
+                Name = req.getParameter("name");
+                Collection Analogs = ManagementSystem.getInstance().getAnalogs(Name);
+                form.setAnalogs(Analogs);
+                Collection AnalogsDB = ManagementSystem.getInstance().getAnalogsDB(Analogs);
+                Cookie[] cookies = req.getCookies();
+                String jsid = null;
+                System.out.println("All cookies received:");
+                for(int i = 0; i < cookies.length; i++){
+                    System.out.println(i + " ." + cookies[i].getName()+" = " + cookies[i].getValue());
+                    if("JSESSIONID".equals(cookies[i].getName())){
+                        jsid = cookies[i].getValue();
+                        System.out.println("JSESSIONID " + jsid + " saved");
+                        break;
+                    }
+                }
+            
+            DateFormat dateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+            Date date = new Date();
+            ManagementSystem.getInstance().setNameFile("eAnalogy0_"+dateFormat.format(date)+".xlsx");
+            
+            ManagementSystem.getInstance().setPathFile(req.getServletContext().getAttribute("FILES_DIR")
+                +File.separator+jsid+File.separator
+                +ManagementSystem.getInstance().getNameFile());
+            System.out.println("Path to generated xlsx file : "
+                    + req.getServletContext().getAttribute("FILES_DIR")
+                    +File.separator+jsid+File.separator
+                    +ManagementSystem.getInstance().getNameFile());
+            
+            ManagementSystem.getInstance().setPathDir(req.getServletContext().getAttribute("FILES_DIR")+File.separator+jsid);
+            File file = new File( ManagementSystem.getInstance().getPathDir());
+            if(!file.exists()) file.mkdirs();
+            System.out.println("File Directory for SESSION = "
+                    +jsid+" ("+ManagementSystem.getInstance().getPathDir()
+                    +") created to be used for storing files");
+            
+            ManagementSystem.getInstance().generateXls(AnalogsDB, ManagementSystem.getInstance().getPathFile());
+                      
             } catch (SQLException sql_e) {
             throw new IOException(sql_e.getMessage());
+            } catch (InvalidFormatException io_e){
+            throw new IOException(io_e.getMessage());
             }
         }
         
         if (answer == 4) {
-            //потом
+            try{
+            File file = new File(ManagementSystem.getInstance().getPathFile());
+            if(!file.exists()){
+                throw new ServletException("File doesn't exists on server.");
+            }
+            System.out.println("File location on server::"+file.getAbsolutePath());
+            ServletContext ctx = getServletContext();
+            InputStream fis = new FileInputStream(file);
+            String mimeType = ctx.getMimeType(file.getAbsolutePath());
+            resp.setContentType(mimeType != null? mimeType:"application/octet-stream");
+            resp.setContentLength((int) file.length());
+            resp.setHeader("Content-Disposition", "attachment; filename=\"" +ManagementSystem.getInstance().getNameFile() + "\"");
+
+            ServletOutputStream os = resp.getOutputStream();
+            byte[] bufferData = new byte[1024];
+            int read=0;
+            while((read = fis.read(bufferData))!= -1){
+                os.write(bufferData, 0, read);
+            }
+            os.flush();
+            os.close();
+            fis.close();
+            System.out.println("File downloaded at client successfully");
+            } catch (ServletException se_e){
+            throw new IOException(se_e.getMessage());    
+            }
         }
 
         req.setAttribute("form", form);
@@ -162,7 +231,7 @@ public class MainFrameServlet extends HttpServlet
                 
         return 0;
     }
-
+     
     public void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         processRequest(req, resp);
     }
